@@ -1,195 +1,265 @@
-﻿# 📺 LocalTV - Sistema de Sinalização Digital (Digital Signage)
+# LocalTV
 
-**LocalTV** é uma aplicação full-stack para gerenciamento de terminais de exibição (TVs/Monitores). Permite controle centralizado de mídias, playlists, templates e overlays em tempo real, com suporte a multi-cliente.
+> Plataforma de sinalização digital para administrar telas, mídias, playlists e conteúdos dinâmicos em tempo real.
 
----
+![LocalTV — Sinalização Digital, Telas e Conteúdo](https://github.com/betoarts/localTV/raw/main/docs/localtv-cover.jpg)
 
-## ✨ Funcionalidades Principais
+[![Node.js](https://img.shields.io/badge/Node.js-Express-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=20232a)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-6-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![SQLite](https://img.shields.io/badge/SQLite-local-003B57?logo=sqlite&logoColor=white)](https://www.sqlite.org/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-- **📦 Biblioteca de Mídias (Ingestão):** Suporte para imagens e vídeos com upload direto via painel administrativo.
-- **📜 Gerenciamento de Playlists:** Crie sequências de exibição personalizadas com ordem e duração ajustáveis.
-- **🏢 Multi-Cliente:** Isolamento por `client_id` para dispositivos, mídias, playlists, itens e templates (Tenancy).
-- **🖥️ Controle de Dispositivos:**
-  - Gerencie múltiplos terminais simultaneamente.
-  - Sincronização em tempo real via WebSockets (Socket.io).
-  - Configuração de orientação (Vertical/Horizontal), resolução (720p, 1080p, 4K) e transições.
-- **🌤️ Widget de Clima Dinâmico:** Integração nativa com a API Open-Meteo para exibir clima em tempo real nas telas baseado na cidade informada.
-- **🤖 Assistente com Texto, Voz e Memória:** A rota `/assistant` aceita texto e microfone, responde com texto e áudio, e mantém memória persistente por `client_id`.
-- **✍️ Overlays de Texto & Mídia Dinâmicos:**
-  - Adicione letreiros, avisos, logos e ícones sobre as mídias.
-  - Animações variadas e posicionamento preciso (coordenadas X/Y).
-- **💾 Backup & Portabilidade:** Exportação e importação completa de toda a configuração do sistema em arquivos JSON.
-- **🛡️ Painel Administrativo:** Interface intuitiva e responsiva (Mobile/Desktop) protegida por senha para controle total da rede.
-- **⚡ Performance Otimizada:** Banco de dados indexado e preloading inteligente de mídias no player.
+O **LocalTV** transforma TVs, monitores e painéis em canais de comunicação gerenciados centralmente. A plataforma permite organizar mídias, montar playlists, configurar templates e overlays, acompanhar dispositivos conectados e distribuir atualizações em tempo real para uma rede de telas.
 
----
+> **Status:** em desenvolvimento ativo. Revise autenticação, isolamento de clientes, armazenamento persistente e chaves de IA antes de utilizar em produção.
 
-## 🚀 Início Rápido (Quick Start)
+## Principais recursos
 
-### Via Docker (Recomendado)
+- **Biblioteca de mídia:** upload e organização de imagens, vídeos, HTML e arquivos por cliente.
+- **Playlists:** sequência de conteúdos com ordem, duração e programação ajustáveis.
+- **Player para telas:** suporte a orientação horizontal/vertical, resolução, transições, volume e reprodução.
+- **Controle em tempo real:** atualizações de playlist, comandos e status via Socket.IO.
+- **Multi-cliente:** isolamento lógico por `client_id` para clientes, telas, mídias, playlists e templates.
+- **Overlays dinâmicos:** textos, imagens, logos, ícones, animações e posicionamento por coordenadas.
+- **Templates visuais:** layouts reutilizáveis para conteúdos e campanhas.
+- **Clima:** integração com Open-Meteo, geocodificação e cache de 10 minutos.
+- **Notícias e RSS:** proxy para feeds RSS ou JSON com cache e normalização dos itens.
+- **Assistente de IA:** texto, voz, áudio, memória persistente e fallback entre provedores.
+- **Monitoramento:** heartbeat, indicação online/offline e painel de atividade atual.
+- **Backup e portabilidade:** exportação e importação da configuração em JSON.
+- **PWA e responsividade:** painel administrativo preparado para desktop, tablet e mobile.
 
-O LocalTV já vem preparado para rodar em containers, facilitando a implantação:
+## Arquitetura
 
-1.  Certifique-se de ter o Docker instalado.
-2.  Na raiz do projeto, execute:
-    ```bash
-    docker build -t localtv .
-    docker run -p 3000:3000 -e ADMIN_PASSWORD=troque-esta-senha -v localtv_data:/data localtv
-    ```
-3.  Acesse `http://localhost:3000`.
+    localTV/
+    ├── backend/
+    │   ├── server.js              # API Express e servidor Socket.IO
+    │   ├── database.js            # SQLite, schema e migrações
+    │   ├── routes/                # Rotas do assistente e configurações
+    │   ├── services/              # Serviços auxiliares e integrações
+    │   ├── API.md                 # Referência da API e eventos
+    │   └── package.json           # Dependências do backend
+    ├── frontend/
+    │   ├── src/admin/             # Painel administrativo
+    │   ├── src/player/            # Player das telas
+    │   ├── src/hooks/             # Hooks de comunicação e voz
+    │   └── package.json           # Dependências do frontend
+    ├── ARCHITECTURE.md            # Decisões e fluxos técnicos
+    ├── Dockerfile                 # Build e execução em container
+    ├── easypanel.yaml             # Configuração para EasyPanel
+    ├── nginx.conf                 # Gateway local
+    ├── install.bat                # Instalação no Windows
+    └── start.bat                  # Inicialização no Windows
 
-Para producao, o volume em `/data` e obrigatorio para persistir `data.db` e arquivos de midia.
-Para usar microfone no assistente fora de `localhost`, publique a aplicacao em `HTTPS`.
+## Stack tecnológica
 
-### Instalação Manual (Windows)
+| Camada | Tecnologia |
+| --- | --- |
+| Backend | Node.js + Express |
+| Banco de dados | SQLite |
+| Tempo real | Socket.IO |
+| Frontend | React 19 + Vite 6 |
+| Estilos | Tailwind CSS 4 |
+| Roteamento | React Router 7 |
+| Ícones e animações | Lucide React + Lottie |
+| Clima | Open-Meteo |
+| IA | Gemma/Ollama, Gemini, Groq e OpenAI |
+| Infraestrutura | Docker, Nginx e EasyPanel |
 
-Para facilitar, incluímos scripts de automação:
+## Pré-requisitos
 
-1.  Execute `install.bat` para instalar as dependências do Frontend e Backend.
-2.  Execute `start.bat` para iniciar ambos os serviços simultaneamente.
-3.  Acesse o Painel Administrativo em `http://localhost:3000/admin` (Senha padrão: `admin123`).
-4.  Acesse o assistente em `http://localhost:5173/assistant` durante desenvolvimento.
+- Node.js 20 ou superior;
+- npm;
+- Docker Desktop para execução containerizada;
+- navegador moderno;
+- HTTPS para utilizar microfone fora de `localhost`;
+- chaves dos provedores de IA quando os recursos correspondentes forem ativados.
 
-## 🧠 Assistente AI
+## Execução rápida com Docker
 
-O projeto possui duas interfaces de assistente:
+1. Construa a imagem:
 
-- **`/assistant`:** tela standalone para tablet/quiosque.
-- **Overlay do player:** assistente flutuante opcional sobre a tela principal.
+       docker build -t localtv .
 
-Recursos atuais:
+2. Inicie o container com armazenamento persistente:
 
-- envio por texto
-- resposta com fala usando `speechSynthesis`
-- entrada por microfone com modo `pressione para falar`
-- fallback automatico de provedores no backend
-- memoria persistente por `client_id`
-- limpeza de memoria pelo proprio assistente
-- painel admin para configurar o assistente e inspecionar a memoria
+       docker run -d --name localtv          -p 3000:3000          -e ADMIN_PASSWORD=troque-esta-senha          -e DATA_DIR=/data          -v localtv_data:/data          localtv
 
-### Provedores suportados
+3. Acesse:
 
-- `gemma` via Ollama/local
-- `gemini` via `GEMINI_API_KEY`
-- `groq` via `GROQ_API_KEY`
-- `openai` via `OPENAI_API_KEY`
+       http://localhost:3000
 
-Variaveis de ambiente mais relevantes para redundancia do assistente:
+O volume em `/data` preserva o banco `data.db`, as mídias e os arquivos de configuração. Em produção, use uma senha forte e um domínio com HTTPS.
 
-```env
-GEMINI_API_KEY=...
-GEMINI_MODEL=gemini-2.0-flash
-GROQ_API_KEY=...
-OPENAI_API_KEY=...
-OPENAI_MODEL=gpt-4o-mini
-OLLAMA_URL=http://localhost:11434
-GEMMA_MODEL=gemma
-```
+## Execução manual
 
-Para `Groq`, basta informar `GROQ_API_KEY`. Se `GROQ_MODEL` nao for definido, o backend usa `llama-3.3-70b-versatile` por padrao.
+### Backend
 
-### Rotas e telas relacionadas
+    cd backend
+    npm install
+    ADMIN_PASSWORD=troque-esta-senha DATA_DIR=./data node server.js
 
-- **Assistente standalone:** `/assistant`
-- **Configuração do assistente:** `/admin/ai-assistant-config`
-- **Memória do assistente:** `/admin/assistant-memory`
+A API e o servidor Socket.IO iniciam na porta definida por `PORT`, com padrão `3000`.
 
-### 🎤 Microfone e Reconhecimento de Voz
+### Frontend
 
-O assistente suporta entrada por voz usando a **Web Speech API** do navegador.
+Em outro terminal:
 
-**Requisitos:**
+    cd frontend
+    npm install
+    npm run dev
 
-| Requisito | Descrição |
-|-----------|-----------|
-| **Navegador** | Chrome ou Edge (Firefox e Safari não suportam) |
-| **Contexto Seguro** | `localhost` ou `HTTPS` obrigatório |
-| **Permissão** | Usuário deve autorizar acesso ao microfone |
-| **Configuração** | `enableVoice: true` no banco de dados |
+Durante o desenvolvimento, o Vite normalmente utiliza a porta `5173`. Consulte o arquivo de configuração do frontend para conferir o proxy da API.
 
-**Ativação:**
+No Windows, os scripts `install.bat` e `start.bat` automatizam a instalação e a inicialização local.
 
-1. Acesse `/assistant` no Chrome ou Edge
-2. Clique no botão de microfone (🎙️)
-3. Autorize o acesso ao microfone se solicitado
-4. Fale sua pergunta e aguarde a transcrição
-5. O assistente enviará automaticamente após detectar o fim da fala
+## Variáveis de ambiente
 
-**Solução de Problemas:**
+### Backend
 
-| Sintoma | Causa Provável | Solução |
-|---------|----------------|---------|
-| Botão cinza/desabilitado | `enableVoice: false` | Ative no painel admin |
-| "Reconhecimento de voz nao suportado" | Navegador incompatível | Use Chrome ou Edge |
-| "Microfone requer HTTPS" | Acessando por IP (ex: 192.168.x.x) | Use HTTPS ou localhost |
-| "Permissao do microfone negada" | Permissão bloqueada | Clique no cadeado da URL → Microfone → Permitir |
-| "Nao detectei fala" | Volume baixo ou silêncio | Fale mais alto ou verifique o microfone |
+| Variável | Padrão | Finalidade |
+| --- | --- | --- |
+| `PORT` | `3000` | Porta HTTP e Socket.IO |
+| `ADMIN_PASSWORD` | `admin123` | Senha do painel administrativo |
+| `DATA_DIR` | diretório do backend | Diretório persistente do banco e mídias |
+| `LOG_REQUESTS` | `0` | Use `1` para habilitar logs HTTP |
 
-**Configuração via Banco de Dados:**
+### Assistente de IA
 
-A configuração `enableVoice` é armazenada na tabela `app_settings`:
+| Variável | Finalidade |
+| --- | --- |
+| `GEMINI_API_KEY` | Chave do Google Gemini |
+| `GEMINI_MODEL` | Modelo Gemini utilizado |
+| `GROQ_API_KEY` | Chave do Groq |
+| `GROQ_MODEL` | Modelo Groq; há um padrão no backend |
+| `OPENAI_API_KEY` | Chave da OpenAI |
+| `OPENAI_MODEL` | Modelo da OpenAI |
+| `OLLAMA_URL` | Endereço do Ollama local |
+| `GEMMA_MODEL` | Modelo Gemma no Ollama |
 
-```json
-{
-  "systemPrompt": "...",
-  "suggestions": ["..."],
-  "responseLength": "curto",
-  "enableOverlay": false,
-  "enableVoice": true
-}
-```
+Configure somente os provedores necessários. O backend pode aplicar fallback automático quando um provedor não estiver disponível.
 
-Para produção em HTTPS, certifique-se de que `enableVoice` esteja habilitado no painel administrativo.
+## Painel administrativo e player
 
-### Memória
+- Painel: `/admin`
+- Player: rota principal da aplicação
+- Assistente standalone: `/assistant`
+- Configuração do assistente: `/admin/ai-assistant-config`
+- Memória do assistente: `/admin/assistant-memory`
 
-A memória V3 possui duas camadas:
+O dispositivo registra sua identidade no Socket.IO, envia heartbeat periódico e recebe comandos de playlist, transição, resolução, volume e reprodução.
 
-- **Histórico curto:** últimas mensagens da conversa.
-- **Fatos persistidos:** informações semânticas simples, como nome, cidade e preferências, extraídas da conversa.
+## API e eventos
 
-Tudo é isolado por `client_id`.
+A API HTTP utiliza o prefixo `/api` e o header `x-client-id` para selecionar o cliente ativo. Consulte a [referência completa da API](backend/API.md).
 
-## ☁️ EasyPanel
+Principais grupos:
 
-O projeto pode ser implantado via `Dockerfile` no EasyPanel.
+| Grupo | Exemplos |
+| --- | --- |
+| Autenticação | `POST /api/auth/login` |
+| Saúde | `GET /health` |
+| Clientes | `/api/clients` |
+| Dispositivos | `/api/devices` |
+| Mídias | `/api/media` |
+| Playlists | `/api/playlists` |
+| Overlays | `/api/overlays` |
+| Clima | `GET /api/weather` |
+| Notícias | `GET /api/news` |
+| Assistente | `POST /api/chat` |
+| Backup | `/api/config/export` e `/api/config/import` |
 
-Recomendações:
+Eventos Socket.IO relevantes:
 
-- monte volume persistente em `/data`
-- publique com domínio e SSL para habilitar microfone fora de `localhost`
-- use `DATA_DIR=/data`
-- use `ADMIN_PASSWORD` e chaves de IA por variáveis de ambiente
+| Evento | Direção | Finalidade |
+| --- | --- | --- |
+| `register_device` | Cliente → servidor | Registra a tela |
+| `heartbeat` | Cliente → servidor | Mantém o dispositivo online |
+| `now_playing` | Cliente → servidor | Informa a mídia em exibição |
+| `playlist:update` | Servidor → cliente | Atualiza a playlist |
+| `command_update` | Servidor → cliente | Atualiza configurações do player |
+| `overlays_updated` | Servidor → cliente | Recarrega overlays |
+| `dashboard_update` | Servidor → cliente | Atualiza o painel administrativo |
 
----
+## Multi-cliente
 
-## 🛠️ Stack Tecnológica
+O cliente ativo pode ser informado por header, query string ou corpo da requisição:
 
-- **Backend:** Node.js, Express, Socket.io (Tempo Real), SQLite (Persistência).
-- **Frontend:** React, Vite, Tailwind CSS (Design Responsivo), Lucide React (Ícones), Web Speech API.
-- **Infra:** Docker, Easypanel (Opcional).
+    x-client-id: cliente-exemplo
 
----
+Quando não informado, o sistema utiliza `default`. Em uma implantação real, associe o cliente a uma autenticação válida e valide autorização no backend antes de permitir acesso aos recursos.
 
-## 📁 Estrutura do Projeto
+## Assistente de voz
 
-```bash
-├── backend/            # API, Sockets e Banco de Dados (SQLite)
-│   ├── database.js     # Schema e migrações incrementais
-│   └── server.js       # Core do servidor
-├── frontend/           # Aplicação React (Admin e Player)
-│   ├── src/admin/      # Telas de gerenciamento
-│   ├── src/hooks/      # Hooks reutilizáveis (ex: useSpeechRecognition.js)
-│   └── src/player/     # O "Motor" de exibição das TVs e assistente
-├── Dockerfile          # Configuração de containerização
-└── ARCHITECTURE.md     # Detalhes técnicos da arquitetura
-```
+A entrada por microfone utiliza a Web Speech API do navegador.
 
----
+| Requisito | Observação |
+| --- | --- |
+| Chrome ou Edge | Melhor compatibilidade |
+| localhost ou HTTPS | Contexto seguro obrigatório |
+| Permissão de microfone | Deve ser autorizada pelo usuário |
+| `enableVoice: true` | Configuração necessária no assistente |
 
-## 🤝 Contribuição
+Fora de `localhost`, publique a aplicação com HTTPS para permitir o uso do microfone.
 
-Para desenvolvedores, consulte o arquivo [ARCHITECTURE.md](./ARCHITECTURE.md) para entender os fluxos de dados e eventos do sistema. Para detalhes de comunicação, veja [backend/API.md](./backend/API.md).
+## Backup e restauração
 
----
-> Desenvolvido para transformar qualquer tela em um canal de comunicação inteligente.
+- Exporte a configuração em `GET /api/config/export`.
+- Armazene o JSON em local seguro.
+- Importe por `POST /api/config/import` somente após validar o arquivo.
+- O processo de importação substitui a configuração existente. Faça backup antes de executar.
+
+O backup lógico não substitui o backup do diretório de mídias nem do banco SQLite.
+
+## Deploy no EasyPanel
+
+1. Crie um serviço a partir do repositório.
+2. Utilize o `Dockerfile` ou o `easypanel.yaml`.
+3. Configure `PORT=3000` e `DATA_DIR=/data`.
+4. Monte um volume persistente em `/data`.
+5. Defina `ADMIN_PASSWORD` e as chaves de IA como secrets.
+6. Publique com domínio e SSL.
+
+## Segurança
+
+- Troque imediatamente a senha administrativa padrão.
+- Não versione `.env`, banco SQLite, tokens ou chaves de IA.
+- Restrinja o header `x-client-id` com autenticação e autorização reais.
+- Evite `CORS *` em produção; permita apenas origens confiáveis.
+- Proteja os endpoints de upload e limite tamanho e tipos de arquivo.
+- Restrinja o acesso ao diretório de mídias.
+- Faça backup do banco e das mídias periodicamente.
+- Monitore o consumo das APIs de IA e feeds externos.
+- Trate a importação de configuração como uma operação destrutiva e controlada.
+
+## Scripts úteis
+
+| Comando | Descrição |
+| --- | --- |
+| `npm install` | Instala dependências |
+| `npm run dev` | Inicia o frontend |
+| `npm run build` | Gera o build de produção |
+| `npm run lint` | Executa a verificação do frontend |
+| `node server.js` | Inicia o backend |
+| `docker build -t localtv .` | Cria a imagem Docker |
+| `docker compose up -d` | Inicia serviços definidos no Compose |
+| `docker compose down` | Para os serviços |
+| `install.bat` | Instala dependências no Windows |
+| `start.bat` | Inicia a aplicação no Windows |
+
+## Contribuição
+
+1. Crie uma branch para sua alteração.
+2. Mantenha mudanças de backend, frontend e infraestrutura documentadas.
+3. Execute o build e o lint antes de abrir um pull request.
+4. Atualize [ARCHITECTURE.md](ARCHITECTURE.md) ou [backend/API.md](backend/API.md) quando alterar contratos.
+5. Descreva no pull request os testes e possíveis impactos operacionais.
+
+## Licença
+
+Este projeto está distribuído sob a licença [MIT](LICENSE).
+
+## Autor
+
+Desenvolvido por [betoarts](https://github.com/betoarts).
